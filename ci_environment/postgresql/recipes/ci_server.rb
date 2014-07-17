@@ -9,7 +9,7 @@
 #
 
 # Create the database directory if you used a custom database dir
-(node['postgresql']['default_version'] + node['postgresql']['alternate_versions']).each do |version|
+(Array(node['postgresql']['default_version']) + node['postgresql']['alternate_versions']).each do |version|
   execute "Create PGDATA" do
     command "/usr/bin/pg_createcluster -D #{File.join(node['postgresql']['data_dir'], version)} #{version} main"
     not_if { File.exists?( File.join(node['postgresql']['data_dir'], version) ) }
