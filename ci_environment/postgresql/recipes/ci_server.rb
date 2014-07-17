@@ -2,11 +2,20 @@
 # Create additional superuser accounts for CI purpose
 #
 # Attention: this configuration step will only occur during the first provision run!
-#            (unless the sql script is removed from cache folder. Please don't to that...)
+#            (unless the sql script is removed from cache folder. Please don't do that...)
 #
 #            It is quite tricky to deal with it after /etc/init.d/postgresql script
 #            has been modified. This restriction should not be a problem for Travis CI usage.
 #
+
+# Create the database directory if you used a custom database dir
+(node['postgresql']['default_version'] + node['postgresql']['alternate_versions']).each do |version|
+  execute "Create PGDATA" do
+    command "/usr/bin/pg_createcluster -D #{File.join(node['postgresql']['data_dir'], version)} #{version} main"
+    not_if { File.exists?( File.join(node['postgresql']['data_dir'], version) ) }
+  end
+end
+
 create_superusers_script = File.join(Chef::Config[:file_cache_path], 'postgresql_create_superusers.sql')
 if not node['postgresql']['superusers'].to_a.empty? and not File.exists?(create_superusers_script)
 
