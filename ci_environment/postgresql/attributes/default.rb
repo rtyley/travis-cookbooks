@@ -12,7 +12,7 @@ default['postgresql']['fsync']               = false   # disabled for CI purpose
 default['postgresql']['full_page_writes']    = false   # disabled for CI purpose
 default['postgresql']['client_min_messages'] = 'error' # suppress warning output from build clients
 
-default['postgresql']['data_on_ramfs']       = true    # enabled for CI purpose
+default['postgresql']['data_on_ramfs']       = false    # enabled for CI purpose
 
 if node['postgresql']['data_on_ramfs']
   include_attribute 'ramfs::default'
