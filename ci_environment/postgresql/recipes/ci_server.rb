@@ -8,11 +8,16 @@
 #            has been modified. This restriction should not be a problem for Travis CI usage.
 #
 
+# Create base directory on RAMFS before creating cluster
+#
+include_recipe "ramfs" if node['postgresql']['data_on_ramfs']
+
 # Create the database directory if you used a custom database dir
 (Array(node['postgresql']['default_version']) + node['postgresql']['alternate_versions']).each do |version|
   execute "Create PGDATA" do
-    command "/usr/bin/pg_createcluster -D #{File.join(node['postgresql']['data_dir'], version)} #{version} main"
-    not_if { File.exists?( File.join(node['postgresql']['data_dir'], version) ) }
+    data_dir = File.join(node['postgresql']['data_dir'], version)
+    command "/usr/bin/pg_createcluster -D #{data_dir} #{version} main"
+    not_if { File.exists?(data_dir) }
   end
 end
 
@@ -60,10 +65,6 @@ template "/etc/init.d/postgresql" do
   mode   0755
 end
 
-#
-# Create base directory on RAMFS
-#
-include_recipe "ramfs" if node['postgresql']['data_on_ramfs']
 
 #
 # Tune PostgreSQL settings
